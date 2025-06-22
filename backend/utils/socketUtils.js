@@ -1,0 +1,1 @@
+exports.safeEmit = (socket, event, data) => { try { socket.emit(event, data); } catch (e) { console.error(e); } };

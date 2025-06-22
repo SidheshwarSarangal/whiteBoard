@@ -1,10 +1,10 @@
-// server/server.js
+// server.js
 const express = require('express');
 const http = require('http');
 const cors = require('cors');
 const { Server } = require('socket.io');
 const connectDB = require('./config/database');
-
+const socketSetup = require('./config/socket');
 require('dotenv').config();
 
 // Initialize app
@@ -21,23 +21,20 @@ connectDB();
 // Set up WebSocket server
 const io = new Server(server, {
   cors: {
-    origin: '*', // For development; restrict in production
+    origin: '*', // For dev only; restrict this in production
     methods: ['GET', 'POST']
   }
 });
 
-// Socket connection
-io.on('connection', (socket) => {
-  console.log(`User connected: ${socket.id}`);
+// Setup custom socket logic
+socketSetup(io);
 
-  socket.on('disconnect', () => {
-    console.log(`User disconnected: ${socket.id}`);
-  });
+// Optional: Add REST API routes
+app.use('/api/rooms', require('./routes/rooms'));
+app.use('/api/users', require('./routes/users'));
 
-  // You can add other socket listeners here (e.g. drawing events)
-});
-
+// Start server
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });
