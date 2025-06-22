@@ -1,4 +1,4 @@
-module.exports = {
+/*module.exports = {
   handleDrawingStart(socket, data, manager) {
     manager.broadcastToRoom(data.roomId, 'drawing:start', data, socket.id);
   },
@@ -17,4 +17,12 @@ module.exports = {
   handleRedo(socket, data, manager) {
     manager.broadcastToRoom(data.roomId, 'drawing:redo', data, socket.id);
   }
+};*/
+
+// server/socket/handlers/drawingHandler.js
+module.exports = (io, socket) => {
+  socket.on('drawing', (data) => {
+    const { roomId, stroke } = data;
+    socket.to(roomId).emit('drawing', stroke); // send to all others in room
+  });
 };

@@ -1,7 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const roomController = require('../controllers/roomController');
 
-router.get('/', roomController.getAllRooms);
+const { createRoom, getRoom } = require('../controllers/roomController');
+const verifyToken = require('../middleware/auth');
+const { validateRoomCreation } = require('../middleware/validation');
+
+router.post('/', validateRoomCreation, createRoom);       // anyone can create room
+router.get('/:id', getRoom);                              // public room access
+router.get('/private/:id', verifyToken, getRoom);         // private room, only with token
 
 module.exports = router;
