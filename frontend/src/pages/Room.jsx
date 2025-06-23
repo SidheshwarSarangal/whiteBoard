@@ -5,7 +5,7 @@ import jsPDF from "jspdf";
 
 import { SocketContext } from "../context/SocketContext";
 import RoomUsers from "../components/RoomUsers";
-import RoomChat from "../components/RoomChat";
+import RoomInfo from "../components/RoomInfo";
 import DrawingPane from "../components/DrawingPane";
 import DrawingTools from "../components/DrawingTools";
 
@@ -90,7 +90,7 @@ const Room = () => {
           setUndoHandler={setHandleUndo}
           setRedoHandler={setHandleRedo}
         />
-        <RoomChat roomId={roomId} roomData={roomData} />
+        <RoomInfo roomId={roomId} roomData={roomData} />
       </div>
     </div>
   );

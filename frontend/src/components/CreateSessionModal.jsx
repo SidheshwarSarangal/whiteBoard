@@ -7,6 +7,8 @@ const CreateSessionModal = ({ onClose }) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [isPublic, setIsPublic] = useState(true);
+  const [password, setPassword] = useState(""); // ✅ New state for password
+
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -16,24 +18,34 @@ const CreateSessionModal = ({ onClose }) => {
     const user = JSON.parse(localStorage.getItem("user"));
     const owner = user || "guest_user";
 
+    const payload = {
+      roomId,
+      name,
+      isPrivate: !isPublic,
+      owner,
+      description,
+    };
+
+    if (!isPublic && password.trim() !== "") {
+      payload.password = password; // ✅ Add password only if not public
+    }
+
     try {
-      const res = await axios.post("http://localhost:5000/api/rooms", {
-        roomId,
-        name,               // ✅ Added name here
-        isPrivate: !isPublic,
-        owner,
-        description,
-      });
+      const res = await axios.post("http://localhost:5000/api/rooms", payload);
+
+      if (!isPublic && password.trim()) {
+        await axios.put(`http://localhost:5000/api/rooms/rooms/${roomId}`, {
+          password,
+        });
+      }
 
       toast.success("Room created successfully!");
-      console.log("✅ Room Created:", res.data);
-
       onClose();
       navigate(`/room/${roomId}`);
     } catch (error) {
-      console.error("❌ Error creating room:", error.response?.data || error.message);
       const msg =
-        error.response?.data?.message || "Room creation failed. Please try again.";
+        error.response?.data?.message ||
+        "Room creation failed. Please try again.";
       toast.error(msg);
     }
   };
@@ -80,6 +92,17 @@ const CreateSessionModal = ({ onClose }) => {
               <div className="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform duration-200 peer-checked:translate-x-5"></div>
             </label>
           </div>
+
+          {/* ✅ Show password input when room is private */}
+          {!isPublic && (
+            <input
+              type="password"
+              placeholder="Set a Password"
+              className="w-full p-2 rounded bg-gray-800 text-white placeholder-gray-400 border border-gray-600 focus:outline-none focus:ring focus:ring-red-500"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          )}
 
           <div className="flex justify-end space-x-3">
             <button

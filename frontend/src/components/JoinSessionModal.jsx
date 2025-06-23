@@ -1,12 +1,37 @@
 import React, { useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-hot-toast";
 
-const JoinSessionModal = ({ onClose, onJoin }) => {
+const JoinSessionModal = ({ onClose }) => {
   const [roomId, setRoomId] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onJoin({ roomId, password });
+    const user = JSON.parse(localStorage.getItem("user"));
+
+    if (!user) {
+      toast.error("You must be signed in to join a session.");
+      return;
+    }
+
+    try {
+      const res = await axios.post("http://localhost:5000/api/rooms/join", {
+        roomId,
+        username: user,
+        password,
+      });
+
+      toast.success("Successfully joined the room!");
+      onClose();
+      navigate(`/room/${roomId}`);
+    } catch (error) {
+      const msg =
+        error.response?.data?.message || "Failed to join the room. Try again.";
+      toast.error(msg);
+    }
   };
 
   return (

@@ -1,4 +1,3 @@
-// src/App.jsx
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import SignIn from "./pages/SignIn";
@@ -7,14 +6,17 @@ import Home from "./pages/Home";
 import Room from "./pages/Room";
 import Profile from "./pages/Profile";
 import PrivateRoute from "./components/PrivateRoute";
+import { Toaster } from "react-hot-toast";
 
 const App = () => (
   <Router>
+    {/* 🔥 Toast rendered outside Routes */}
+    <Toaster position="top-right" reverseOrder={false} />
+
     <Routes>
       <Route path="/signin" element={<SignIn />} />
       <Route path="/signup" element={<SignUp />} />
 
-      {/* Protected Routes */}
       <Route
         path="/home"
         element={
@@ -39,8 +41,6 @@ const App = () => (
           </PrivateRoute>
         }
       />
-
-      {/* Catch-all redirects to SignIn */}
       <Route path="*" element={<SignIn />} />
     </Routes>
   </Router>

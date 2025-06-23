@@ -27,7 +27,7 @@ const Home = () => {
         setMyBoards(res.data);
         console.log(myBoards);
       })
-      
+
       .catch((err) => {
         console.error("Failed to fetch boards", err);
       });
@@ -40,43 +40,57 @@ const Home = () => {
         <TopBar onCreate={handleCreateSession} onJoin={handleJoinSession} />
 
         <div className="flex-1 p-6 overflow-y-auto space-y-8">
-          <div>
-            <h2 className="text-2xl font-semibold mb-4 text-green-400">
-              Your Whiteboards
-            </h2>
-            <div className="flex gap-6 flex-wrap">
-              {myBoards.map((board, i) => (
-                <WhiteboardCard
-                  key={i}
-                  roomId={board.roomId}
-                  title={board.name}
-                  description={board.description || "No description"}
-                  access={board.isPrivate ? "Private" : "Public"}
-                  onOpen={() => {
-                    window.location.href = `/room/${board.roomId}`;
-                  }}
-                  date={new Date(board.createdAt).toLocaleDateString()}
-                />
-              ))}
+          {/* Your Whiteboards */}
+          {myBoards.length > 0 ? (
+            <div>
+              <h2 className="text-2xl font-semibold mb-4 text-green-400">
+                Your Whiteboards
+              </h2>
+              <div className="flex gap-6 flex-wrap">
+                {myBoards.map((board, i) => (
+                  <WhiteboardCard
+                    key={i}
+                    roomId={board.roomId}
+                    title={board.name}
+                    description={board.description || "No description"}
+                    access={board.isPrivate ? "Private" : "Public"}
+                    onOpen={() => {
+                      window.location.href = `/room/${board.roomId}`;
+                    }}
+                    date={new Date(board.createdAt).toLocaleDateString()}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="text-gray-400 text-lg">
+              You have no whiteboards yet.
+            </div>
+          )}
 
-          <div>
-            <h2 className="text-2xl font-semibold mb-4 text-green-400">
-              Collaborative Whiteboards
-            </h2>
-            <div className="flex gap-6 flex-wrap">
-              {collabBoards.map((board, i) => (
-                <WhiteboardCard
-                  key={i}
-                  title={board.title}
-                  description={board.description}
-                  access={board.access}
-                  onOpen={() => console.log("Open", board.title)}
-                />
-              ))}
+          {/* Collaborative Whiteboards */}
+          {collabBoards.length > 0 ? (
+            <div>
+              <h2 className="text-2xl font-semibold mb-4 text-green-400">
+                Collaborative Whiteboards
+              </h2>
+              <div className="flex gap-6 flex-wrap">
+                {collabBoards.map((board, i) => (
+                  <WhiteboardCard
+                    key={i}
+                    title={board.title}
+                    description={board.description}
+                    access={board.access}
+                    onOpen={() => console.log("Open", board.title)}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="text-gray-400 text-lg">
+              You're not part of any collaborative boards yet.
+            </div>
+          )}
         </div>
       </div>
     </div>

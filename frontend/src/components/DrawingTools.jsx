@@ -27,7 +27,7 @@ const DrawingTools = ({
   };
 
   return (
-    <div className="w-full p-3 bg-gray-800 flex flex-wrap gap-3 items-center justify-start relative z-10">
+    <div className="w-full p-3 bg-gray-800 flex flex-wrap gap-3 items-center justify-center relative z-10">
       <select
         className="bg-gray-700 text-white px-2 py-1 rounded"
         value={tool}

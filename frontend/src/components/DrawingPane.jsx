@@ -32,73 +32,10 @@ const DrawingPane = ({
 
   const user = JSON.parse(localStorage.getItem("user") || "{}");
 
-  const redrawCanvas = (strokes) => {
-    const ctx = contextRef.current;
-    if (!ctx || !canvasRef.current) return;
-
-    ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-    strokes.forEach((s) => drawStroke(s, ctx));
-  };
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    canvas.width = canvas.offsetWidth;
-    canvas.height = canvas.offsetHeight;
-    const ctx = canvas.getContext("2d");
-    ctx.lineCap = "round";
-    ctx.lineJoin = "round";
-    contextRef.current = ctx;
-
-    const previewCanvas = previewCanvasRef.current;
-    previewCanvas.width = canvas.width;
-    previewCanvas.height = canvas.height;
-    previewCtxRef.current = previewCanvas.getContext("2d");
-
-    const token = localStorage.getItem("token");
-    console.log("token", user);
-    if (!token || !user || !roomId) return;
-
-    axios
-      .get(`http://localhost:5000/api/drawings/${roomId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((res) => {
-        const strokes = res.data.map((entry) => ({
-          ...entry.strokeData,
-          _id: entry._id,
-        }));
-        setAllStrokes(strokes);
-        console.log("setalstrokes", allStrokes);
-        setMyStrokes(strokes.filter((s) => s.userId === user));
-        setMyRedo([]);
-        redrawCanvas(strokes);
-      });
-
-    socket.on("drawing", ({ stroke }) => {
-      setAllStrokes((prev) => {
-        const updated = [...prev, stroke];
-        redrawCanvas(updated);
-        return updated;
-      });
-    });
-
-    socket.on("drawing_deleted", (deletedId) => {
-      setAllStrokes((prev) => {
-        const updated = prev.filter((s) => s._id !== deletedId);
-        redrawCanvas(updated);
-        return updated;
-      });
-    });
-
-    return () => {
-      socket.off("drawing");
-      socket.off("drawing_deleted");
-    };
-  }, [roomId, socket, user]);
-
   const drawStroke = (stroke, ctx) => {
+    if (!stroke || !stroke.points || !Array.isArray(stroke.points)) return;
     const { type = "pen", color, width, fill, points } = stroke;
-    if (!points?.length || !ctx) return;
+    if (!points.length || !ctx) return;
 
     ctx.strokeStyle = color || "black";
     ctx.fillStyle = color || "black";
@@ -146,6 +83,79 @@ const DrawingPane = ({
       fill ? ctx.fill() : ctx.stroke();
     }
   };
+
+  const redrawCanvas = (strokes) => {
+    const ctx = contextRef.current;
+    if (!ctx || !canvasRef.current) return;
+
+    ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+    strokes
+      .filter((s) => s && s.points && Array.isArray(s.points))
+      .forEach((s) => drawStroke(s, ctx));
+  };
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+    const ctx = canvas.getContext("2d");
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    contextRef.current = ctx;
+
+    const previewCanvas = previewCanvasRef.current;
+    previewCanvas.width = canvas.width;
+    previewCanvas.height = canvas.height;
+    previewCtxRef.current = previewCanvas.getContext("2d");
+
+    const token = localStorage.getItem("token");
+    if (!token || !user || !roomId) return;
+
+    axios
+      .get(`http://localhost:5000/api/drawings/${roomId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => {
+        const strokes = res.data.map((entry) => ({
+          ...entry.strokeData,
+          _id: entry._id,
+        }));
+        setAllStrokes(strokes);
+        setMyStrokes(strokes.filter((s) => s.userId === user));
+        setMyRedo([]);
+        redrawCanvas(strokes);
+      });
+
+    socket.on("drawing", (data) => {
+      const stroke = data.stroke; // 👈 safely extract
+
+      console.log("Received stroke via socket:", stroke); // ✅ Add this
+
+      if (!stroke || !stroke.points || !Array.isArray(stroke.points)) {
+        console.warn("Invalid stroke received:", stroke);
+        return;
+      }
+
+      setAllStrokes((prev) => {
+        const updated = [...prev, stroke];
+        redrawCanvas(updated);
+        return updated;
+      });
+    });
+
+    socket.on("drawing_deleted", (deletedId) => {
+      setAllStrokes((prev) => {
+        const updated = prev.filter((s) => s._id !== deletedId);
+        redrawCanvas(updated);
+        return updated;
+      });
+    });
+
+    return () => {
+      socket.off("drawing");
+      socket.off("drawing_deleted");
+    };
+  }, [roomId, socket, user]);
 
   const clearPreview = () => {
     previewCtxRef.current?.clearRect(
@@ -238,7 +248,7 @@ const DrawingPane = ({
       });
       setMyStrokes((prev) => [...prev, savedStroke]);
       setMyRedo([]);
-      socket.emit("drawing", { roomId, stroke: savedStroke }); // ✅ FIXED
+      socket.emit("drawing", { roomId, stroke: savedStroke });
     } catch (error) {
       console.error("Error saving stroke:", error);
     }
@@ -264,7 +274,7 @@ const DrawingPane = ({
         return updated;
       });
 
-      socket.emit("drawing_deleted", { roomId, strokeId: popped._id }); // ✅ FIXED
+      socket.emit("drawing_deleted", { roomId, strokeId: popped._id });
     } catch (error) {
       console.error("Error during undo:", error);
     }
@@ -292,7 +302,7 @@ const DrawingPane = ({
 
       setMyStrokes((prev) => [...prev, savedStroke]);
       setMyRedo(rest);
-      socket.emit("drawing", { roomId, stroke: savedStroke }); // ✅ FIXED
+      socket.emit("drawing", { roomId, stroke: savedStroke });
     } catch (error) {
       console.error("Error during redo:", error);
     }

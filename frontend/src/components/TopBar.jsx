@@ -20,7 +20,7 @@ const TopBar = () => {
 
   return (
     <>
-      <div className="w-full flex justify-end items-center px-6 py-3 bg-gray-900 text-white shadow">
+      <div className="w-full flex justify-end items-center px-12 py-3 bg-gray-900 text-white shadow">
         <button
           className="bg-white text-blue-600 px-4 py-2 rounded-md font-semibold mr-4 hover:bg-gray-200"
           onClick={() => setShowJoinModal(true)}

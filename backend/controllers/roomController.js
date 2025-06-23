@@ -1,5 +1,7 @@
 // server/controllers/roomController.js
 const Room = require('../models/Room');
+const bcrypt = require('bcrypt');
+
 
 // server/controllers/roomController.js
 
@@ -53,5 +55,72 @@ exports.getRoomsByOwner = async (req, res) => {
     res.status(200).json(rooms);
   } catch (error) {
     res.status(500).json({ message: 'Failed to fetch rooms', error: error.message });
+  }
+};
+
+
+exports.updateRoomPassword = async (req, res) => {
+  const { roomId } = req.params;
+  const { password } = req.body;
+
+  if (typeof password !== "string") {
+    return res.status(400).json({ message: "Password must be provided as a string" });
+  }
+
+  try {
+    const room = await Room.findOneAndUpdate(
+      { roomId },
+      {
+        password,          
+        isPrivate: true,   
+      },
+      { new: true }
+    );
+
+    if (!room) {
+      return res.status(404).json({ message: "Room not found" });
+    }
+
+    res.status(200).json({ message: "Password updated", room });
+  } catch (error) {
+    console.error("Error updating password:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+// Join a room if allowed
+exports.joinRoom = async (req, res) => {
+  const { roomId, username, password = "" } = req.body;
+
+  try {
+    const room = await Room.findOne({ roomId });
+
+    if (!room) {
+      return res.status(404).json({ message: "Room not found" });
+    }
+
+    // Check if already allowed
+    if (room.allowedUsers.includes(username)) {
+      return res.status(200).json({ message: "Already joined", room });
+    }
+
+    if (!room.isPrivate) {
+      // Public room – directly allow
+      room.allowedUsers.push(username);
+      await room.save();
+      return res.status(200).json({ message: "Joined public room", room });
+    } else {
+      // Private room – verify password
+      if (room.password === password) {
+        room.allowedUsers.push(username);
+        await room.save();
+        return res.status(200).json({ message: "Joined private room", room });
+      } else {
+        return res.status(401).json({ message: "Incorrect password" });
+      }
+    }
+  } catch (error) {
+    console.error("Error joining room:", error);
+    return res.status(500).json({ message: "Server error", error: error.message });
   }
 };
