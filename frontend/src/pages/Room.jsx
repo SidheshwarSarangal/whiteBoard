@@ -13,6 +13,9 @@ const Room = () => {
   const { roomId } = useParams();
   const socket = useContext(SocketContext);
 
+  const [handleUndo, setHandleUndo] = useState(() => () => {});
+  const [handleRedo, setHandleRedo] = useState(() => () => {});
+
   const [roomData, setRoomData] = useState(null);
   const [tool, setTool] = useState("pen");
   const [strokeColor, setStrokeColor] = useState("#000000");
@@ -31,20 +34,15 @@ const Room = () => {
 
   const handleDownload = (format) => {
     const canvas = document.getElementById("drawing-canvas");
-
     if (!canvas) return;
 
-    // Create an offscreen canvas to draw white background + original drawing
     const tempCanvas = document.createElement("canvas");
     tempCanvas.width = canvas.width;
     tempCanvas.height = canvas.height;
     const ctx = tempCanvas.getContext("2d");
 
-    // Fill white background
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
-
-    // Draw the current canvas on top
     ctx.drawImage(canvas, 0, 0);
 
     const dataUrl = tempCanvas.toDataURL(
@@ -77,6 +75,8 @@ const Room = () => {
         fill={fill}
         setFill={setFill}
         handleDownload={handleDownload}
+        onUndo={handleUndo}
+        onRedo={handleRedo}
       />
 
       <div className="flex flex-1">
@@ -86,8 +86,9 @@ const Room = () => {
           tool={tool}
           strokeColor={strokeColor}
           strokeWidth={strokeWidth}
-          fillColor={fillColor}
           fill={fill}
+          setUndoHandler={setHandleUndo}
+          setRedoHandler={setHandleRedo}
         />
         <RoomChat roomId={roomId} roomData={roomData} />
       </div>

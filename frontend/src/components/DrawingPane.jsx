@@ -1,8 +1,22 @@
-import React, { useEffect, useRef, useContext, useState } from "react";
+import React, {
+  useEffect,
+  useRef,
+  useContext,
+  useState,
+  useCallback,
+} from "react";
 import { SocketContext } from "../context/SocketContext";
 import axios from "axios";
 
-const DrawingPane = ({ roomId, tool, strokeColor, strokeWidth, fill }) => {
+const DrawingPane = ({
+  roomId,
+  tool,
+  strokeColor,
+  strokeWidth,
+  fill,
+  setUndoHandler,
+  setRedoHandler,
+}) => {
   const socket = useContext(SocketContext);
   const canvasRef = useRef(null);
   const contextRef = useRef(null);
@@ -12,7 +26,20 @@ const DrawingPane = ({ roomId, tool, strokeColor, strokeWidth, fill }) => {
   const startPos = useRef(null);
   const points = useRef([]);
 
-  // Setup canvases and load previous strokes
+  const [allStrokes, setAllStrokes] = useState([]);
+  const [myStrokes, setMyStrokes] = useState([]);
+  const [myRedo, setMyRedo] = useState([]);
+
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+  const redrawCanvas = (strokes) => {
+    const ctx = contextRef.current;
+    if (!ctx || !canvasRef.current) return;
+
+    ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+    strokes.forEach((s) => drawStroke(s, ctx));
+  };
+
   useEffect(() => {
     const canvas = canvasRef.current;
     canvas.width = canvas.offsetWidth;
@@ -28,61 +55,105 @@ const DrawingPane = ({ roomId, tool, strokeColor, strokeWidth, fill }) => {
     previewCtxRef.current = previewCanvas.getContext("2d");
 
     const token = localStorage.getItem("token");
-    if (!token) return;
+    console.log("token", user);
+    if (!token || !user || !roomId) return;
 
     axios
       .get(`http://localhost:5000/api/drawings/${roomId}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
-        if (Array.isArray(res.data)) {
-          res.data.forEach(({ strokeData }) => drawStroke(strokeData, ctx));
-        }
+        const strokes = res.data.map((entry) => ({
+          ...entry.strokeData,
+          _id: entry._id,
+        }));
+        setAllStrokes(strokes);
+        console.log("setalstrokes", allStrokes);
+        setMyStrokes(strokes.filter((s) => s.userId === user));
+        setMyRedo([]);
+        redrawCanvas(strokes);
       });
 
-    socket.on("drawing", (stroke) => drawStroke(stroke, ctx));
+    socket.on("drawing", ({ stroke }) => {
+      setAllStrokes((prev) => {
+        const updated = [...prev, stroke];
+        redrawCanvas(updated);
+        return updated;
+      });
+    });
 
-    return () => socket.off("drawing");
-  }, [roomId, socket]);
+    socket.on("drawing_deleted", (deletedId) => {
+      setAllStrokes((prev) => {
+        const updated = prev.filter((s) => s._id !== deletedId);
+        redrawCanvas(updated);
+        return updated;
+      });
+    });
 
-  // Draw any kind of stroke
-  const drawStroke = ({ type, color, width, fill, points }, ctx) => {
-    ctx.strokeStyle = color;
-    ctx.fillStyle = color;
-    ctx.lineWidth = width;
-    ctx.beginPath();
+    return () => {
+      socket.off("drawing");
+      socket.off("drawing_deleted");
+    };
+  }, [roomId, socket, user]);
 
-    if (type === "pen" || type === "eraser") {
+  const drawStroke = (stroke, ctx) => {
+    const { type = "pen", color, width, fill, points } = stroke;
+    if (!points?.length || !ctx) return;
+
+    ctx.strokeStyle = color || "black";
+    ctx.fillStyle = color || "black";
+    ctx.lineWidth = width || 2;
+
+    if (
+      type === "pen" ||
+      (!["line", "rectangle", "circle", "eraser"].includes(type) &&
+        points.length > 1)
+    ) {
+      ctx.beginPath();
       ctx.moveTo(points[0].x, points[0].y);
       for (let i = 1; i < points.length; i++) {
         ctx.lineTo(points[i].x, points[i].y);
       }
       ctx.stroke();
-    } else if (type === "line") {
-      const [start, end] = points;
-      ctx.moveTo(start.x, start.y);
-      ctx.lineTo(end.x, end.y);
+    } else if (type === "eraser") {
+      ctx.beginPath();
+      ctx.strokeStyle = "#ffffff";
+      ctx.moveTo(points[0].x, points[0].y);
+      for (let i = 1; i < points.length; i++) {
+        ctx.lineTo(points[i].x, points[i].y);
+      }
       ctx.stroke();
-    } else if (type === "rectangle") {
+    } else if (type === "line" && points.length === 2) {
+      ctx.beginPath();
+      ctx.moveTo(points[0].x, points[0].y);
+      ctx.lineTo(points[1].x, points[1].y);
+      ctx.stroke();
+    } else if (type === "rectangle" && points.length === 2) {
       const [start, end] = points;
       const x = Math.min(start.x, end.x);
       const y = Math.min(start.y, end.y);
       const w = Math.abs(end.x - start.x);
       const h = Math.abs(end.y - start.y);
+      ctx.beginPath();
       fill ? ctx.fillRect(x, y, w, h) : ctx.strokeRect(x, y, w, h);
-    } else if (type === "circle") {
+    } else if (type === "circle" && points.length === 2) {
       const [start, end] = points;
       const radius = Math.sqrt(
         Math.pow(end.x - start.x, 2) + Math.pow(end.y - start.y, 2)
       );
+      ctx.beginPath();
       ctx.arc(start.x, start.y, radius, 0, 2 * Math.PI);
       fill ? ctx.fill() : ctx.stroke();
     }
   };
 
   const clearPreview = () => {
-    const ctx = previewCtxRef.current;
-    ctx.clearRect(0, 0, previewCanvasRef.current.width, previewCanvasRef.current.height);
+    previewCtxRef.current?.clearRect(
+      0,
+      0,
+      previewCanvasRef.current.width,
+      previewCanvasRef.current.height
+    );
   };
 
   const handleMouseDown = (e) => {
@@ -121,64 +192,129 @@ const DrawingPane = ({ roomId, tool, strokeColor, strokeWidth, fill }) => {
     }
   };
 
-  const handleMouseUp = (e) => {
+  const handleMouseUp = async (e) => {
     if (!isDrawing.current) return;
     isDrawing.current = false;
     clearPreview();
 
     const { offsetX, offsetY } = e.nativeEvent;
+    const finalPoint = { x: offsetX, y: offsetY };
 
+    let stroke;
     if (tool === "pen" || tool === "eraser") {
-      points.current.push({ x: offsetX, y: offsetY });
-
-      const stroke = {
+      points.current.push(finalPoint);
+      stroke = {
         type: tool,
         color: tool === "eraser" ? "#ffffff" : strokeColor,
         width: strokeWidth,
         points: [...points.current],
+        userId: user,
       };
-
-      drawStroke(stroke, contextRef.current);
-      socket.emit("drawing", { roomId, stroke });
-
-      const token = localStorage.getItem("token");
-      if (token) {
-        axios.post(
-          "http://localhost:5000/api/drawings",
-          { roomId, strokeData: stroke },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-      }
-
-      points.current = [];
-      return;
+    } else {
+      stroke = {
+        type: tool,
+        color: strokeColor,
+        width: strokeWidth,
+        fill,
+        points: [startPos.current, finalPoint],
+        userId: user,
+      };
     }
 
-    const stroke = {
-      type: tool,
-      color: strokeColor,
-      width: strokeWidth,
-      fill,
-      points: [startPos.current, { x: offsetX, y: offsetY }],
-    };
-
-    drawStroke(stroke, contextRef.current);
-    socket.emit("drawing", { roomId, stroke });
-
-    const token = localStorage.getItem("token");
-    if (token) {
-      axios.post(
+    try {
+      const res = await axios.post(
         "http://localhost:5000/api/drawings",
         { roomId, strokeData: stroke },
-        { headers: { Authorization: `Bearer ${token}` } }
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        }
       );
+
+      const savedStroke = { ...stroke, _id: res.data._id };
+      setAllStrokes((prev) => {
+        const updated = [...prev, savedStroke];
+        redrawCanvas(updated);
+        return updated;
+      });
+      setMyStrokes((prev) => [...prev, savedStroke]);
+      setMyRedo([]);
+      socket.emit("drawing", { roomId, stroke: savedStroke }); // ✅ FIXED
+    } catch (error) {
+      console.error("Error saving stroke:", error);
     }
+
+    points.current = [];
   };
+
+  const handleUndo = useCallback(async () => {
+    if (myStrokes.length === 0) return;
+    const popped = myStrokes[myStrokes.length - 1];
+
+    try {
+      await axios.delete(`http://localhost:5000/api/drawings/${popped._id}`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+
+      setMyStrokes((prev) => prev.slice(0, -1));
+      setMyRedo((r) => [popped, ...r]);
+
+      setAllStrokes((prev) => {
+        const updated = prev.filter((s) => s._id !== popped._id);
+        redrawCanvas(updated);
+        return updated;
+      });
+
+      socket.emit("drawing_deleted", { roomId, strokeId: popped._id }); // ✅ FIXED
+    } catch (error) {
+      console.error("Error during undo:", error);
+    }
+  }, [myStrokes, roomId, socket]);
+
+  const handleRedo = useCallback(async () => {
+    if (myRedo.length === 0) return;
+    const [restroke, ...rest] = myRedo;
+
+    try {
+      const res = await axios.post(
+        "http://localhost:5000/api/drawings",
+        { roomId, strokeData: restroke },
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        }
+      );
+
+      const savedStroke = { ...restroke, _id: res.data._id };
+      setAllStrokes((prev) => {
+        const updated = [...prev, savedStroke];
+        redrawCanvas(updated);
+        return updated;
+      });
+
+      setMyStrokes((prev) => [...prev, savedStroke]);
+      setMyRedo(rest);
+      socket.emit("drawing", { roomId, stroke: savedStroke }); // ✅ FIXED
+    } catch (error) {
+      console.error("Error during redo:", error);
+    }
+  }, [myRedo, roomId, socket]);
+
+  useEffect(() => {
+    setUndoHandler(() => handleUndo);
+    setRedoHandler(() => handleRedo);
+  }, [handleUndo, handleRedo, setUndoHandler, setRedoHandler]);
 
   return (
     <div className="flex-1 bg-white relative">
-      <canvas id="drawing-canvas" ref={canvasRef} className="absolute top-0 left-0 w-full h-full" />
-      <canvas ref={previewCanvasRef} className="absolute top-0 left-0 w-full h-full pointer-events-none" />
+      <canvas
+        ref={canvasRef}
+        className="absolute top-0 left-0 w-full h-full"
+        style={{ width: "100%", height: "100%" }}
+      />
+      <canvas
+        ref={previewCanvasRef}
+        className="absolute top-0 left-0 w-full h-full pointer-events-none"
+        style={{ width: "100%", height: "100%" }}
+      />
       <div
         className="absolute top-0 left-0 w-full h-full"
         onMouseDown={handleMouseDown}

@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
+import { SocketContext } from "../context/SocketContext";
+import { useParams } from "react-router-dom";
 
 const DrawingTools = ({
   tool,
@@ -12,17 +14,20 @@ const DrawingTools = ({
   fill,
   setFill,
   handleDownload,
+  onUndo,
+  onRedo,
 }) => {
   const [showDownloadMenu, setShowDownloadMenu] = useState(false);
+  const socket = useContext(SocketContext);
+  const { roomId } = useParams();
 
   const triggerDownload = (format) => {
     handleDownload(format);
-    setShowDownloadMenu(false); // Close dropdown
+    setShowDownloadMenu(false);
   };
 
   return (
-    <div className="w-full p-3 bg-gray-800 flex flex-wrap items-center gap-4 justify-center relative">
-      {/* Tool Selector */}
+    <div className="w-full p-3 bg-gray-800 flex flex-wrap gap-3 items-center justify-start relative z-10">
       <select
         className="bg-gray-700 text-white px-2 py-1 rounded"
         value={tool}
@@ -35,7 +40,6 @@ const DrawingTools = ({
         <option value="circle">Circle</option>
       </select>
 
-      {/* Stroke Color */}
       <label className="text-white">Stroke</label>
       <input
         type="color"
@@ -43,7 +47,6 @@ const DrawingTools = ({
         onChange={(e) => setStrokeColor(e.target.value)}
       />
 
-      {/* Stroke Width */}
       <label className="text-white">Size</label>
       <input
         type="range"
@@ -54,7 +57,6 @@ const DrawingTools = ({
         className="w-32"
       />
 
-      {/* Fill Shape Checkbox */}
       <label className="text-white flex items-center gap-2">
         <input
           type="checkbox"
@@ -64,7 +66,19 @@ const DrawingTools = ({
         Fill Shape
       </label>
 
-      {/* Download Dropdown */}
+      <button
+        onClick={onUndo}
+        className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
+      >
+        Undo
+      </button>
+      <button
+        onClick={onRedo}
+        className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded"
+      >
+        Redo
+      </button>
+
       <div className="relative">
         <button
           onClick={() => setShowDownloadMenu((prev) => !prev)}
