@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useContext } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
+import jsPDF from "jspdf";
 
 import { SocketContext } from "../context/SocketContext";
 import RoomUsers from "../components/RoomUsers";
@@ -15,7 +16,9 @@ const Room = () => {
   const [roomData, setRoomData] = useState(null);
   const [tool, setTool] = useState("pen");
   const [strokeColor, setStrokeColor] = useState("#000000");
+  const [fillColor, setFillColor] = useState("#ffffff");
   const [strokeWidth, setStrokeWidth] = useState(2);
+  const [fill, setFill] = useState(false);
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user"));
@@ -26,6 +29,40 @@ const Room = () => {
     });
   }, [roomId, socket]);
 
+  const handleDownload = (format) => {
+    const canvas = document.getElementById("drawing-canvas");
+
+    if (!canvas) return;
+
+    // Create an offscreen canvas to draw white background + original drawing
+    const tempCanvas = document.createElement("canvas");
+    tempCanvas.width = canvas.width;
+    tempCanvas.height = canvas.height;
+    const ctx = tempCanvas.getContext("2d");
+
+    // Fill white background
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+
+    // Draw the current canvas on top
+    ctx.drawImage(canvas, 0, 0);
+
+    const dataUrl = tempCanvas.toDataURL(
+      `image/${format === "jpg" ? "jpeg" : "png"}`
+    );
+
+    if (format === "pdf") {
+      const pdf = new jsPDF();
+      pdf.addImage(dataUrl, "PNG", 10, 10, 180, 160);
+      pdf.save(`drawing-${roomId}.pdf`);
+    } else {
+      const a = document.createElement("a");
+      a.href = dataUrl;
+      a.download = `drawing-${roomId}.${format}`;
+      a.click();
+    }
+  };
+
   return (
     <div className="h-screen flex flex-col bg-gray-900 text-white">
       <DrawingTools
@@ -33,8 +70,13 @@ const Room = () => {
         setTool={setTool}
         strokeColor={strokeColor}
         setStrokeColor={setStrokeColor}
+        fillColor={fillColor}
+        setFillColor={setFillColor}
         strokeWidth={strokeWidth}
         setStrokeWidth={setStrokeWidth}
+        fill={fill}
+        setFill={setFill}
+        handleDownload={handleDownload}
       />
 
       <div className="flex flex-1">
@@ -44,6 +86,8 @@ const Room = () => {
           tool={tool}
           strokeColor={strokeColor}
           strokeWidth={strokeWidth}
+          fillColor={fillColor}
+          fill={fill}
         />
         <RoomChat roomId={roomId} roomData={roomData} />
       </div>
