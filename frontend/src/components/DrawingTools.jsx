@@ -1,17 +1,36 @@
-const DrawingTools = () => (
-  <div className="w-full p-3 bg-gray-800 flex justify-center items-center gap-4">
-    <select className="bg-gray-700 text-white px-2 py-1 rounded">
-      <option>Pen</option>
-      <option>Line</option>
-      <option>Rectangle</option>
-    </select>
+import React from "react";
 
-    <input type="color" title="Stroke" />
-    <input type="color" title="Fill" />
-    <input type="range" min="1" max="20" title="Size" className="w-32" />
+const DrawingTools = ({ tool, setTool, strokeColor, setStrokeColor, strokeWidth, setStrokeWidth }) => {
+  return (
+    <div className="w-full p-3 bg-gray-800 flex justify-center items-center gap-4">
+      <select
+        className="bg-gray-700 text-white px-2 py-1 rounded"
+        value={tool}
+        onChange={(e) => setTool(e.target.value)}
+      >
+        <option value="pen">Pen</option>
+        <option value="line">Line</option>
+        <option value="rectangle">Rectangle</option>
+      </select>
 
-    <button className="text-white px-2">⤓</button>
-    <button className="text-white px-2">✖</button>
-  </div>
-);
+      <input
+        type="color"
+        title="Stroke"
+        value={strokeColor}
+        onChange={(e) => setStrokeColor(e.target.value)}
+      />
+
+      <input
+        type="range"
+        min="1"
+        max="20"
+        value={strokeWidth}
+        onChange={(e) => setStrokeWidth(e.target.value)}
+        title="Size"
+        className="w-32"
+      />
+    </div>
+  );
+};
+
 export default DrawingTools;

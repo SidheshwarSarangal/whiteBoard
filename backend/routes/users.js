@@ -7,4 +7,5 @@ const { validateUserJoin } = require('../middleware/validation');
 router.post('/', validateUserJoin, addUser);              // validate user join
 router.delete('/:socketId', removeUser);                  // no auth needed
 
+
 module.exports = router;

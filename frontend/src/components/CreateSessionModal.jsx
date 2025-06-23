@@ -1,18 +1,47 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { toast, Toaster } from "react-hot-toast";
 
-const CreateSessionModal = ({ onClose, onSubmit }) => {
+const CreateSessionModal = ({ onClose }) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [isPublic, setIsPublic] = useState(true);
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSubmit({ name, description, isPublic });
-    onClose();
+
+    const roomId = `room-${Math.random().toString(36).slice(2, 17)}`;
+    const user = JSON.parse(localStorage.getItem("user"));
+    const owner = user || "guest_user";
+
+    try {
+      const res = await axios.post("http://localhost:5000/api/rooms", {
+        roomId,
+        name,               // ✅ Added name here
+        isPrivate: !isPublic,
+        owner,
+        description,
+      });
+
+      toast.success("Room created successfully!");
+      console.log("✅ Room Created:", res.data);
+
+      onClose();
+      navigate(`/room/${roomId}`);
+    } catch (error) {
+      console.error("❌ Error creating room:", error.response?.data || error.message);
+      const msg =
+        error.response?.data?.message || "Room creation failed. Please try again.";
+      toast.error(msg);
+    }
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm">
+      <Toaster position="top-right" reverseOrder={false} />
+
       <div className="bg-[#1e1e2f] w-full max-w-md rounded-md shadow-lg p-6 border border-gray-700">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-bold text-white">Create Session</h3>
@@ -38,16 +67,17 @@ const CreateSessionModal = ({ onClose, onSubmit }) => {
             onChange={(e) => setDescription(e.target.value)}
           />
 
-          <div className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              checked={isPublic}
-              onChange={() => setIsPublic(!isPublic)}
-              id="publicToggle"
-              className="accent-blue-500"
-            />
-            <label htmlFor="publicToggle" className="text-gray-300">
-              Public Access
+          <div className="flex items-center justify-left gap-4">
+            <span className="text-gray-300 font-medium">Public Access</span>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                className="sr-only peer"
+                checked={isPublic}
+                onChange={() => setIsPublic(!isPublic)}
+              />
+              <div className="w-11 h-6 bg-gray-600 rounded-full peer peer-checked:bg-green-500 transition-colors duration-200"></div>
+              <div className="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform duration-200 peer-checked:translate-x-5"></div>
             </label>
           </div>
 

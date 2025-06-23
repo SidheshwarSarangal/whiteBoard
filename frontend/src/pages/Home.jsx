@@ -1,10 +1,14 @@
 // src/pages/Home.jsx
-import React from "react";
+import React, { useEffect, useState } from "react";
 import TopBar from "../components/TopBar";
 import Sidebar from "../components/SideBar";
 import WhiteboardCard from "../components/BoardCard";
+import axios from "axios";
 
 const Home = () => {
+  const [myBoards, setMyBoards] = useState([]);
+  const [collabBoards] = useState([]); // Optional: Add logic for this later
+
   const handleCreateSession = () => {
     console.log("Create Session Clicked");
   };
@@ -13,32 +17,27 @@ const Home = () => {
     console.log("Join Session Clicked");
   };
 
-  const myBoards = [
-    {
-      title: "Math Sketch",
-      description: "whiteboard 1",
-      access: "Private",
-    },
-    {
-      title: "Flowchart",
-      description: "class work",
-      access: "Public",
-    },
-  ];
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (!user) return;
 
-  const collabBoards = [
-    {
-      title: "Team Planning",
-      description: "group whiteboard",
-      access: "Public",
-    },
-  ];
+    axios
+      .get(`http://localhost:5000/api/rooms/getRoomsByOwner?owner=${user}`)
+      .then((res) => {
+        setMyBoards(res.data);
+        console.log(myBoards);
+      })
+      
+      .catch((err) => {
+        console.error("Failed to fetch boards", err);
+      });
+  }, []);
 
   return (
     <div className="h-screen flex bg-gray-900 text-white">
       <Sidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
-        <TopBar  />
+        <TopBar onCreate={handleCreateSession} onJoin={handleJoinSession} />
 
         <div className="flex-1 p-6 overflow-y-auto space-y-8">
           <div>
@@ -49,10 +48,14 @@ const Home = () => {
               {myBoards.map((board, i) => (
                 <WhiteboardCard
                   key={i}
-                  title={board.title}
-                  description={board.description}
-                  access={board.access}
-                  onOpen={() => console.log("Open", board.title)}
+                  roomId={board.roomId}
+                  title={board.name}
+                  description={board.description || "No description"}
+                  access={board.isPrivate ? "Private" : "Public"}
+                  onOpen={() => {
+                    window.location.href = `/room/${board.roomId}`;
+                  }}
+                  date={new Date(board.createdAt).toLocaleDateString()}
                 />
               ))}
             </div>

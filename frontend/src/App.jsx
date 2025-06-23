@@ -6,15 +6,41 @@ import SignUp from "./pages/SignUp";
 import Home from "./pages/Home";
 import Room from "./pages/Room";
 import Profile from "./pages/Profile";
+import PrivateRoute from "./components/PrivateRoute";
 
 const App = () => (
   <Router>
     <Routes>
       <Route path="/signin" element={<SignIn />} />
       <Route path="/signup" element={<SignUp />} />
-      <Route path="/profile" element={<Profile />}/>
-      <Route path="/home" element={<Home />} />
-      <Route path="/room/:roomId" element={<Room />} />
+
+      {/* Protected Routes */}
+      <Route
+        path="/home"
+        element={
+          <PrivateRoute>
+            <Home />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <PrivateRoute>
+            <Profile />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/room/:roomId"
+        element={
+          <PrivateRoute>
+            <Room />
+          </PrivateRoute>
+        }
+      />
+
+      {/* Catch-all redirects to SignIn */}
       <Route path="*" element={<SignIn />} />
     </Routes>
   </Router>

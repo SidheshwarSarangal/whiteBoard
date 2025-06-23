@@ -4,6 +4,8 @@ const { body, validationResult } = require('express-validator');
 const validateRoomCreation = [
   body('roomId').isString().notEmpty().withMessage('roomId is required'),
   body('isPrivate').isBoolean().withMessage('isPrivate must be boolean'),
+  body('owner').isString().notEmpty().withMessage('owner is required'),
+  body('description').optional().isString(),
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -12,6 +14,7 @@ const validateRoomCreation = [
     next();
   },
 ];
+
 
 const validateUserJoin = [
   body('username').isString().notEmpty().withMessage('username is required'),
