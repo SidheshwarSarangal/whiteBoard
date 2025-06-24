@@ -112,8 +112,8 @@ const DrawingPane = ({
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    canvas.width = canvas.offsetWidth;
-    canvas.height = canvas.offsetHeight;
+    canvas.width = 1024;
+    canvas.height = 690;
     const ctx = canvas.getContext("2d");
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
@@ -122,8 +122,8 @@ const DrawingPane = ({
     contextRef.current = ctx;
 
     const previewCanvas = previewCanvasRef.current;
-    previewCanvas.width = canvas.width;
-    previewCanvas.height = canvas.height;
+    previewCanvas.width = 1024;
+    previewCanvas.height = 690;
     previewCtxRef.current = previewCanvas.getContext("2d");
 
     const token = localStorage.getItem("token");
@@ -352,98 +352,101 @@ const DrawingPane = ({
 
   return (
     <div className="flex-1 bg-white relative">
-      <canvas
-        ref={canvasRef}
-        className="absolute top-0 left-0 w-full h-full"
-        style={{ zIndex: 0 }}
-      />
-      <canvas
-        ref={previewCanvasRef}
-        className="absolute top-0 left-0 w-full h-full pointer-events-none"
-        style={{ zIndex: 1 }}
-      />
-      <div
-        className="absolute top-0 left-0 w-full h-full z-20"
-        onClick={(e) => {
-          if (tool === "text") {
-            const rect = e.currentTarget.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            setTextInput({ x, y, value: "" });
-          }
-        }}
-        onMouseDown={tool !== "text" ? handleMouseDown : undefined}
-        onMouseMove={tool !== "text" ? handleMouseMove : undefined}
-        onMouseUp={tool !== "text" ? handleMouseUp : undefined}
-        onMouseLeave={tool !== "text" ? handleMouseUp : undefined}
-      />
-      {textInput && (
-        <textarea
-          autoFocus
-          className="absolute z-50 bg-white text-black border border-gray-400 p-1 resize outline-none"
-          style={{
-            top: textInput.y,
-            left: textInput.x,
-            fontSize: `${strokeWidth * 4}px`,
-            minWidth: "120px",
-            minHeight: "40px",
-            lineHeight: 1.2,
-          }}
-          value={textInput.value}
-          onChange={(e) =>
-            setTextInput((prev) => ({ ...prev, value: e.target.value }))
-          }
-          onBlur={async () => {
-            if (!textInput.value.trim()) {
-              setTextInput(null);
-              return;
-            }
-
-            const stroke = {
-              type: "text",
-              text: textInput.value,
-              x: textInput.x,
-              y: textInput.y,
-              size: strokeWidth * 4,
-              color: strokeColor,
-              userId: user,
-            };
-
-            drawStroke(stroke, contextRef.current);
-
-            try {
-              const res = await axios.post(
-                "http://localhost:5000/api/drawings",
-                { roomId, strokeData: stroke },
-                {
-                  headers: {
-                    Authorization: `Bearer ${localStorage.getItem("token")}`,
-                  },
-                }
-              );
-              const savedStroke = { ...stroke, _id: res.data._id };
-              setAllStrokes((prev) => {
-                const updated = [...prev, savedStroke];
-                redrawCanvas(updated);
-                return updated;
-              });
-              setMyStrokes((prev) => [...prev, savedStroke]);
-              setMyRedo([]);
-              socket.emit("drawing", { roomId, stroke: savedStroke });
-            } catch (err) {
-              console.error("Error saving text stroke", err);
-            }
-
-            setTextInput(null);
-          }}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault();
-              e.target.blur();
-            }
-          }}
+      <div className="relative" style={{ width: "1024px", height: "690px" }}>
+        <canvas
+          id="drawing-canvas" // ✅ Important for download
+          ref={canvasRef}
+          className="absolute top-0 left-0 w-full h-full"
+          style={{ zIndex: 0 }}
         />
-      )}
+        <canvas
+          ref={previewCanvasRef}
+          className="absolute top-0 left-0 w-full h-full pointer-events-none"
+          style={{ zIndex: 1 }}
+        />
+        <div
+          className="absolute top-0 left-0 w-full h-full z-20 pointer-events-none"
+          onClick={(e) => {
+            if (tool === "text") {
+              const rect = e.currentTarget.getBoundingClientRect();
+              const x = e.clientX - rect.left;
+              const y = e.clientY - rect.top;
+              setTextInput({ x, y, value: "" });
+            }
+          }}
+          onMouseDown={tool !== "text" ? handleMouseDown : undefined}
+          onMouseMove={tool !== "text" ? handleMouseMove : undefined}
+          onMouseUp={tool !== "text" ? handleMouseUp : undefined}
+          onMouseLeave={tool !== "text" ? handleMouseUp : undefined}
+        />
+        {textInput && (
+          <textarea
+            autoFocus
+            className="absolute z-50 bg-white text-black border border-gray-400 p-1 resize outline-none"
+            style={{
+              top: textInput.y,
+              left: textInput.x,
+              fontSize: `${strokeWidth * 4}px`,
+              minWidth: "120px",
+              minHeight: "40px",
+              lineHeight: 1.2,
+            }}
+            value={textInput.value}
+            onChange={(e) =>
+              setTextInput((prev) => ({ ...prev, value: e.target.value }))
+            }
+            onBlur={async () => {
+              if (!textInput.value.trim()) {
+                setTextInput(null);
+                return;
+              }
+
+              const stroke = {
+                type: "text",
+                text: textInput.value,
+                x: textInput.x,
+                y: textInput.y,
+                size: strokeWidth * 4,
+                color: strokeColor,
+                userId: user,
+              };
+
+              drawStroke(stroke, contextRef.current);
+
+              try {
+                const res = await axios.post(
+                  "http://localhost:5000/api/drawings",
+                  { roomId, strokeData: stroke },
+                  {
+                    headers: {
+                      Authorization: `Bearer ${localStorage.getItem("token")}`,
+                    },
+                  }
+                );
+                const savedStroke = { ...stroke, _id: res.data._id };
+                setAllStrokes((prev) => {
+                  const updated = [...prev, savedStroke];
+                  redrawCanvas(updated);
+                  return updated;
+                });
+                setMyStrokes((prev) => [...prev, savedStroke]);
+                setMyRedo([]);
+                socket.emit("drawing", { roomId, stroke: savedStroke });
+              } catch (err) {
+                console.error("Error saving text stroke", err);
+              }
+
+              setTextInput(null);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                e.target.blur();
+              }
+            }}
+          />
+        )}
+      </div>
     </div>
   );
 };

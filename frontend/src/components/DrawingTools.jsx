@@ -111,7 +111,7 @@ const DrawingTools = ({
         </>
       )}
 
-      <div className="relative">
+      <div className="relative z-50">
         <button
           onClick={() => setShowDownloadMenu((prev) => !prev)}
           className="bg-gray-700 text-white px-3 py-1 rounded hover:bg-gray-600"

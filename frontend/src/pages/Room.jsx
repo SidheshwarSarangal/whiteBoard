@@ -49,9 +49,8 @@ const Room = () => {
     ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
     ctx.drawImage(canvas, 0, 0);
 
-    const dataUrl = tempCanvas.toDataURL(
-      `image/${format === "jpg" ? "jpeg" : "png"}`
-    );
+    const mimeType = `image/${format === "jpg" ? "jpeg" : "png"}`;
+    const dataUrl = tempCanvas.toDataURL(mimeType);
 
     if (format === "pdf") {
       const pdf = new jsPDF();
@@ -86,7 +85,6 @@ const Room = () => {
     }
   };
 
- 
   const isUserAllowed =
     roomData &&
     (roomData.owner === user ||
