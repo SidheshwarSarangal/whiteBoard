@@ -353,19 +353,35 @@ const DrawingPane = ({
   return (
     <div className="flex-1 bg-white relative">
       <div className="relative" style={{ width: "1024px", height: "690px" }}>
+        {/* Base Drawing Canvas */}
         <canvas
-          id="drawing-canvas" // ✅ Important for download
+          id="drawing-canvas"
           ref={canvasRef}
-          className="absolute top-0 left-0 w-full h-full"
+          className="absolute top-0 left-0"
+          width={1024}
+          height={690}
           style={{ zIndex: 0 }}
         />
+
+        {/* Preview Layer */}
         <canvas
           ref={previewCanvasRef}
-          className="absolute top-0 left-0 w-full h-full pointer-events-none"
+          className="absolute top-0 left-0 pointer-events-none"
+          width={1024}
+          height={690}
           style={{ zIndex: 1 }}
         />
+
+        {/* Interaction Layer */}
         <div
-          className="absolute top-0 left-0 w-full h-full z-20 pointer-events-none"
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "1024px",
+            height: "690px",
+            zIndex: 2, // lower than dropdown (z-50)
+          }}
           onClick={(e) => {
             if (tool === "text") {
               const rect = e.currentTarget.getBoundingClientRect();
@@ -379,6 +395,8 @@ const DrawingPane = ({
           onMouseUp={tool !== "text" ? handleMouseUp : undefined}
           onMouseLeave={tool !== "text" ? handleMouseUp : undefined}
         />
+
+        {/* Floating Text Input */}
         {textInput && (
           <textarea
             autoFocus

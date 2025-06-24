@@ -120,7 +120,11 @@ const DrawingTools = ({
         </button>
 
         {showDownloadMenu && (
-          <div className="absolute top-full left-0 mt-1 bg-white text-black rounded shadow-md z-50">
+          <div
+            className="absolute top-full left-0 mt-1 bg-white text-black rounded shadow-md"
+            style={{ zIndex: 1000 }}
+          >
+            {" "}
             {["png", "jpg", "pdf"].map((format) => (
               <div
                 key={format}
