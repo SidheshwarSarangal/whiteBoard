@@ -22,13 +22,13 @@ const Home = () => {
 
     // 1. Fetch own boards
     axios
-      .get(`http://localhost:5000/api/rooms/getRoomsByOwner?owner=${user}`)
+      .get(`https://whiteboard-svwy.onrender.com/api/rooms/getRoomsByOwner?owner=${user}`)
       .then((res) => setMyBoards(res.data))
       .catch((err) => console.error("Failed to fetch my boards", err));
 
     // 2. Fetch user's collab roomIds
     axios
-      .get(`http://localhost:5000/api/users/collabs/${user}`)
+      .get(`https://whiteboard-svwy.onrender.com/api/users/collabs/${user}`)
       .then(async (res) => {
         const roomIds = res.data.collabs || [];
 
@@ -38,7 +38,7 @@ const Home = () => {
         const responses = await Promise.all(
           roomIds.map((id) =>
             axios
-              .get(`http://localhost:5000/api/rooms/${id}`)
+              .get(`https://whiteboard-svwy.onrender.com/api/rooms/${id}`)
               .then((res) => res.data)
               .catch((err) => {
                 console.error(`Error fetching room ${id}:`, err);

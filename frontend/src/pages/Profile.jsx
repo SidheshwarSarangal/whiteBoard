@@ -11,7 +11,7 @@ const Profile = () => {
     if (!storedUser) return;
 
     axios
-      .get(`http://localhost:5000/api/users/by-username/${storedUser}`)
+      .get(`https://whiteboard-svwy.onrender.com/api/users/by-username/${storedUser}`)
       .then((res) => setUserData(res.data))
       .catch((err) => console.error("Error fetching user data:", err));
   }, []);

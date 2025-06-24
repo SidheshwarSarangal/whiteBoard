@@ -130,7 +130,7 @@ const DrawingPane = ({
     if (!token || !user || !roomId) return;
 
     axios
-      .get(`http://localhost:5000/api/drawings/${roomId}`, {
+      .get(`https://whiteboard-svwy.onrender.com/api/drawings/${roomId}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
@@ -249,7 +249,7 @@ const DrawingPane = ({
 
     try {
       const res = await axios.post(
-        "http://localhost:5000/api/drawings",
+        "https://whiteboard-svwy.onrender.com/api/drawings",
         { roomId, strokeData: stroke },
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
@@ -276,7 +276,7 @@ const DrawingPane = ({
     const popped = myStrokes[myStrokes.length - 1];
 
     try {
-      await axios.delete(`http://localhost:5000/api/drawings/${popped._id}`, {
+      await axios.delete(`https://whiteboard-svwy.onrender.com/api/drawings/${popped._id}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
 
@@ -301,7 +301,7 @@ const DrawingPane = ({
 
     try {
       const res = await axios.post(
-        "http://localhost:5000/api/drawings",
+        "https://whiteboard-svwy.onrender.com/api/drawings",
         { roomId, strokeData: restroke },
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
@@ -433,7 +433,7 @@ const DrawingPane = ({
 
               try {
                 const res = await axios.post(
-                  "http://localhost:5000/api/drawings",
+                  "https://whiteboard-svwy.onrender.com/api/drawings",
                   { roomId, strokeData: stroke },
                   {
                     headers: {

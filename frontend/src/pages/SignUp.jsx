@@ -19,7 +19,7 @@ const SignUp = () => {
     }
 
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/signup", {
+      const res = await axios.post("https://whiteboard-svwy.onrender.com/api/auth/signup", {
         username,
         password,
       });

@@ -31,7 +31,7 @@ const Room = () => {
   useEffect(() => {
     socket.emit("join_room", { roomId, username: user });
 
-    axios.get(`http://localhost:5000/api/rooms/${roomId}`).then((res) => {
+    axios.get(`https://whiteboard-svwy.onrender.com/api/rooms/${roomId}`).then((res) => {
       setRoomData(res.data);
     });
   }, [roomId, socket]);
@@ -67,7 +67,7 @@ const Room = () => {
   const handleClearCanvas = async () => {
     try {
       const res = await axios.delete(
-        `http://localhost:5000/api/drawings/all/${roomId}`,
+        `https://whiteboard-svwy.onrender.com/api/drawings/all/${roomId}`,
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         }

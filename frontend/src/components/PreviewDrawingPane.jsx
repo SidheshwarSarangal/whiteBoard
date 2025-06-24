@@ -88,7 +88,7 @@ const PreviewDrawingPane = ({ roomId }) => {
     if (!token || !roomId) return;
 
     axios
-      .get(`http://localhost:5000/api/drawings/${roomId}`, {
+      .get(`https://whiteboard-svwy.onrender.com/api/drawings/${roomId}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {

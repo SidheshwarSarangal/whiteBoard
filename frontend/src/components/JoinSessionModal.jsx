@@ -19,13 +19,13 @@ const JoinSessionModal = ({ onClose }) => {
 
     try {
       // Update the user's collabs with this roomId
-      await axios.post("http://localhost:5000/api/users/add-room-to-collabs", {
+      await axios.post("https://whiteboard-svwy.onrender.com/api/users/add-room-to-collabs", {
         username: user,
         roomId,
       });
 
       // Try joining the room
-      const res = await axios.post("http://localhost:5000/api/rooms/join", {
+      const res = await axios.post("https://whiteboard-svwy.onrender.com/api/rooms/join", {
         roomId,
         username: user,
         password,

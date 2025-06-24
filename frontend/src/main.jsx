@@ -6,7 +6,7 @@ import "./index.css";
 import { SocketContext } from "./context/SocketContext";
 import { io } from "socket.io-client";
 
-const socket = io("http://localhost:5000"); // ✅ Only initialized here
+const socket = io("https://whiteboard-svwy.onrender.com"); // ✅ Only initialized here
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>

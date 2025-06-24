@@ -31,10 +31,10 @@ const CreateSessionModal = ({ onClose }) => {
     }
 
     try {
-      const res = await axios.post("http://localhost:5000/api/rooms", payload);
+      const res = await axios.post("https://whiteboard-svwy.onrender.com/api/rooms", payload);
 
       if (!isPublic && password.trim()) {
-        await axios.put(`http://localhost:5000/api/rooms/rooms/${roomId}`, {
+        await axios.put(`https://whiteboard-svwy.onrender.com/api/rooms/rooms/${roomId}`, {
           password,
         });
       }

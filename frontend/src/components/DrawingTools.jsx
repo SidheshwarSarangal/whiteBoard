@@ -27,7 +27,7 @@ const DrawingTools = ({
   const [allowed, setAllowed] = useState(false);
 
   React.useEffect(() => {
-    fetch(`http://localhost:5000/api/rooms/${roomId}`)
+    fetch(`https://whiteboard-svwy.onrender.com/api/rooms/${roomId}`)
       .then((res) => res.json())
       .then((roomData) => {
         if (
