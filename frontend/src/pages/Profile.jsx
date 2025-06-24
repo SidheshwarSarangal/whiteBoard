@@ -70,10 +70,7 @@ const Profile = () => {
                 />
               </div>
             </div>
-            {/* Avatar */}
-            <div className="w-28 h-28 rounded-full bg-green-500 flex items-center justify-center text-white text-4xl font-bold shadow">
-              {userData.username.charAt(0).toUpperCase()}
-            </div>
+           
           </div>
         </div>
       </div>
