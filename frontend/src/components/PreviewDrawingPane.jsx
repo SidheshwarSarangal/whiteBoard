@@ -9,26 +9,28 @@ const PreviewDrawingPane = ({ roomId }) => {
   const [allStrokes, setAllStrokes] = useState([]);
 
   const drawStroke = (stroke, ctx) => {
-    if (!stroke || !stroke.points || !Array.isArray(stroke.points)) return;
-    const { type = "pen", color, width, fill, points } = stroke;
-    if (!points.length || !ctx) return;
+    if (!stroke || !ctx) return;
+
+    const { type, color, width, fill, points, text, x, y, size } = stroke;
 
     ctx.strokeStyle = color || "black";
     ctx.fillStyle = color || "black";
     ctx.lineWidth = width || 2;
 
-    if (
-      type === "pen" ||
-      (!["line", "rectangle", "circle", "eraser"].includes(type) &&
-        points.length > 1)
-    ) {
+    if (type === "text" && text) {
+      ctx.font = `${size || 16}px sans-serif`;
+      const lines = text.split("\n");
+      lines.forEach((line, idx) => {
+        ctx.fillText(line, x, y + idx * (size || 16) * 1.2);
+      });
+    } else if (type === "pen" && points?.length > 1) {
       ctx.beginPath();
       ctx.moveTo(points[0].x, points[0].y);
       for (let i = 1; i < points.length; i++) {
         ctx.lineTo(points[i].x, points[i].y);
       }
       ctx.stroke();
-    } else if (type === "eraser") {
+    } else if (type === "eraser" && points?.length > 1) {
       ctx.beginPath();
       ctx.strokeStyle = "#ffffff";
       ctx.moveTo(points[0].x, points[0].y);
@@ -36,12 +38,12 @@ const PreviewDrawingPane = ({ roomId }) => {
         ctx.lineTo(points[i].x, points[i].y);
       }
       ctx.stroke();
-    } else if (type === "line" && points.length === 2) {
+    } else if (type === "line" && points?.length === 2) {
       ctx.beginPath();
       ctx.moveTo(points[0].x, points[0].y);
       ctx.lineTo(points[1].x, points[1].y);
       ctx.stroke();
-    } else if (type === "rectangle" && points.length === 2) {
+    } else if (type === "rectangle" && points?.length === 2) {
       const [start, end] = points;
       const x = Math.min(start.x, end.x);
       const y = Math.min(start.y, end.y);
@@ -49,7 +51,7 @@ const PreviewDrawingPane = ({ roomId }) => {
       const h = Math.abs(end.y - start.y);
       ctx.beginPath();
       fill ? ctx.fillRect(x, y, w, h) : ctx.strokeRect(x, y, w, h);
-    } else if (type === "circle" && points.length === 2) {
+    } else if (type === "circle" && points?.length === 2) {
       const [start, end] = points;
       const radius = Math.sqrt(
         Math.pow(end.x - start.x, 2) + Math.pow(end.y - start.y, 2)
@@ -62,9 +64,12 @@ const PreviewDrawingPane = ({ roomId }) => {
 
   const redrawCanvas = (strokes) => {
     const ctx = contextRef.current;
-    if (!ctx || !canvasRef.current) return;
+    const canvas = canvasRef.current;
+    if (!ctx || !canvas) return;
 
-    ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+    ctx.fillStyle = "white";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
     strokes.forEach((s) => drawStroke(s, ctx));
   };
 
@@ -75,6 +80,8 @@ const PreviewDrawingPane = ({ roomId }) => {
     const ctx = canvas.getContext("2d");
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
+    ctx.fillStyle = "white";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
     contextRef.current = ctx;
 
     const token = localStorage.getItem("token");
@@ -94,7 +101,7 @@ const PreviewDrawingPane = ({ roomId }) => {
       });
 
     socket.on("drawing", ({ stroke }) => {
-      if (!stroke || !Array.isArray(stroke.points)) return;
+      if (!stroke) return;
       setAllStrokes((prev) => {
         const updated = [...prev, stroke];
         redrawCanvas(updated);

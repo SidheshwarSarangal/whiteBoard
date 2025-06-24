@@ -26,7 +26,6 @@ const DrawingTools = ({
   const [allowed, setAllowed] = useState(false);
 
   React.useEffect(() => {
-    // Fetch roomData to check if user is allowed
     fetch(`http://localhost:5000/api/rooms/${roomId}`)
       .then((res) => res.json())
       .then((roomData) => {
@@ -46,7 +45,6 @@ const DrawingTools = ({
 
   return (
     <div className="w-full p-3 bg-gray-800 flex flex-wrap gap-3 items-center justify-center relative z-10">
-      {/* Allowed tools - only for permitted users */}
       {allowed && (
         <>
           <select
@@ -70,14 +68,17 @@ const DrawingTools = ({
           />
 
           <label className="text-white">Size</label>
-          <input
-            type="range"
-            min="1"
-            max="20"
+          <select
+            className="bg-gray-700 text-white px-2 py-1 rounded"
             value={strokeWidth}
             onChange={(e) => setStrokeWidth(Number(e.target.value))}
-            className="w-32"
-          />
+          >
+            {[2, 4, 6, 8, 10, 12, 14, 16, 18, 20].map((size) => (
+              <option key={size} value={size}>
+                {size}
+              </option>
+            ))}
+          </select>
 
           <label className="text-white flex items-center gap-2">
             <input
@@ -103,7 +104,6 @@ const DrawingTools = ({
         </>
       )}
 
-      {/* Download button - always visible */}
       <div className="relative">
         <button
           onClick={() => setShowDownloadMenu((prev) => !prev)}
