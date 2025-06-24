@@ -56,12 +56,13 @@ const DrawingTools = ({
           >
             <option value="pen">Pen</option>
             <option value="eraser">Eraser</option>
+            <option value="text">Text</option>
             <option value="line">Line</option>
             <option value="rectangle">Rectangle</option>
             <option value="circle">Circle</option>
           </select>
 
-          <label className="text-white">Stroke</label>
+          <label className="text-white">Color</label>
           <input
             type="color"
             value={strokeColor}
