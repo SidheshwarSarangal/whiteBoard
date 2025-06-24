@@ -18,6 +18,8 @@ const Room = () => {
   const [handleRedo, setHandleRedo] = useState(() => () => {});
   const [roomData, setRoomData] = useState(null);
 
+  const [allStrokes, setAllStrokes] = useState([]);
+
   const [tool, setTool] = useState("pen");
   const [strokeColor, setStrokeColor] = useState("#000000");
   const [fillColor, setFillColor] = useState("#ffffff");
@@ -63,6 +65,28 @@ const Room = () => {
     }
   };
 
+  const handleClearCanvas = async () => {
+    try {
+      const res = await axios.delete(
+        `http://localhost:5000/api/drawings/all/${roomId}`,
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        }
+      );
+
+      // Emit canvas_cleared event to all
+      socket.emit("clear_canvas", { roomId });
+
+      // ✅ ALSO emit stroke deletions so others update their allStrokes
+      allStrokes.forEach((stroke) => {
+        socket.emit("drawing_deleted", { roomId, strokeId: stroke._id });
+      });
+    } catch (err) {
+      console.error("Failed to clear canvas:", err);
+    }
+  };
+
+ 
   const isUserAllowed =
     roomData &&
     (roomData.owner === user ||
@@ -81,6 +105,7 @@ const Room = () => {
         strokeWidth={strokeWidth}
         setStrokeWidth={setStrokeWidth}
         fill={fill}
+        onClearCanvas={handleClearCanvas}
         setFill={setFill}
         handleDownload={handleDownload}
         onUndo={handleUndo}
@@ -97,6 +122,7 @@ const Room = () => {
             strokeColor={strokeColor}
             strokeWidth={strokeWidth}
             fill={fill}
+            setAllStrokesExternal={setAllStrokes}
             setUndoHandler={setHandleUndo}
             setRedoHandler={setHandleRedo}
           />

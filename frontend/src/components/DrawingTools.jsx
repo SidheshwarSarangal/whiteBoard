@@ -15,6 +15,7 @@ const DrawingTools = ({
   setFill,
   handleDownload,
   onUndo,
+  onClearCanvas, // 👈 Add this
   onRedo,
 }) => {
   const [showDownloadMenu, setShowDownloadMenu] = useState(false);
@@ -100,6 +101,12 @@ const DrawingTools = ({
             className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded"
           >
             Redo
+          </button>
+          <button
+            onClick={onClearCanvas}
+            className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded"
+          >
+            Clear Canvas
           </button>
         </>
       )}

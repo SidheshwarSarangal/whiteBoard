@@ -36,3 +36,12 @@ exports.deleteDrawingById = async (req, res) => {
     res.status(500).json({ message: "Error deleting", error: err.message });
   }
 };
+
+exports.clearAllDrawings = async (req, res) => {
+  try {
+    await Drawing.deleteMany({ roomId: req.params.roomId });
+    res.status(200).json({ message: 'All drawings deleted' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete drawings' });
+  }
+};

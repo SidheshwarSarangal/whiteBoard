@@ -86,12 +86,28 @@ const DrawingPane = ({
     }
   };
 
-  const redrawCanvas = (strokes) => {
+  /* const redrawCanvas = (strokes) => {
     const ctx = contextRef.current;
     if (!ctx || !canvasRef.current) return;
     ctx.fillStyle = "white";
     ctx.fillRect(0, 0, canvasRef.current.width, canvasRef.current.height);
     strokes.forEach((s) => drawStroke(s, ctx));
+  };*/
+
+  const redrawCanvas = (strokes) => {
+    const canvas = canvasRef.current;
+    const ctx = contextRef.current;
+    if (!ctx || !canvas) return;
+
+    // Full wipe
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "white";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Redraw strokes if any
+    if (Array.isArray(strokes)) {
+      strokes.forEach((s) => drawStroke(s, ctx));
+    }
   };
 
   useEffect(() => {
@@ -309,6 +325,30 @@ const DrawingPane = ({
     setUndoHandler(() => handleUndo);
     setRedoHandler(() => handleRedo);
   }, [handleUndo, handleRedo, setUndoHandler, setRedoHandler]);
+
+  useEffect(() => {
+    socket.on("canvas_cleared", () => {
+      // Clear state
+      setAllStrokes([]);
+      setMyStrokes([]);
+      setMyRedo([]);
+
+      // Clear canvas context
+      const ctx = contextRef.current;
+      if (ctx && canvasRef.current) {
+        ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+        ctx.fillStyle = "white";
+        ctx.fillRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+      }
+
+      // ✅ Force full redraw (empty strokes to ensure no stale state)
+      redrawCanvas([]);
+    });
+
+    return () => {
+      socket.off("canvas_cleared");
+    };
+  }, [socket]);
 
   return (
     <div className="flex-1 bg-white relative">
