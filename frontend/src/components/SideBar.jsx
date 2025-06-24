@@ -16,7 +16,7 @@ const Sidebar = () => {
   };
 
   return (
-    <div className="w-64 cursor-default bg-gray-100 h-screen shadow-md flex flex-col justify-between p-5 relative">
+    <div className="w-48 cursor-default bg-gray-100 h-screen shadow-md flex flex-col justify-between p-5 relative">
       <div>
         <h2 className="text-xl font-bold mb-6 text-blue-600">Menu</h2>
         <ul className="space-y-4">

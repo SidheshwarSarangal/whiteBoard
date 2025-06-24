@@ -21,6 +21,24 @@ const DrawingTools = ({
   const socket = useContext(SocketContext);
   const { roomId } = useParams();
 
+  const user = JSON.parse(localStorage.getItem("user"));
+
+  const [allowed, setAllowed] = useState(false);
+
+  React.useEffect(() => {
+    // Fetch roomData to check if user is allowed
+    fetch(`http://localhost:5000/api/rooms/${roomId}`)
+      .then((res) => res.json())
+      .then((roomData) => {
+        if (
+          roomData.owner === user ||
+          (roomData.allowedUsers && roomData.allowedUsers.includes(user))
+        ) {
+          setAllowed(true);
+        }
+      });
+  }, [roomId, user]);
+
   const triggerDownload = (format) => {
     handleDownload(format);
     setShowDownloadMenu(false);
@@ -28,57 +46,63 @@ const DrawingTools = ({
 
   return (
     <div className="w-full p-3 bg-gray-800 flex flex-wrap gap-3 items-center justify-center relative z-10">
-      <select
-        className="bg-gray-700 text-white px-2 py-1 rounded"
-        value={tool}
-        onChange={(e) => setTool(e.target.value)}
-      >
-        <option value="pen">Pen</option>
-        <option value="eraser">Eraser</option>
-        <option value="line">Line</option>
-        <option value="rectangle">Rectangle</option>
-        <option value="circle">Circle</option>
-      </select>
+      {/* Allowed tools - only for permitted users */}
+      {allowed && (
+        <>
+          <select
+            className="bg-gray-700 text-white px-2 py-1 rounded"
+            value={tool}
+            onChange={(e) => setTool(e.target.value)}
+          >
+            <option value="pen">Pen</option>
+            <option value="eraser">Eraser</option>
+            <option value="line">Line</option>
+            <option value="rectangle">Rectangle</option>
+            <option value="circle">Circle</option>
+          </select>
 
-      <label className="text-white">Stroke</label>
-      <input
-        type="color"
-        value={strokeColor}
-        onChange={(e) => setStrokeColor(e.target.value)}
-      />
+          <label className="text-white">Stroke</label>
+          <input
+            type="color"
+            value={strokeColor}
+            onChange={(e) => setStrokeColor(e.target.value)}
+          />
 
-      <label className="text-white">Size</label>
-      <input
-        type="range"
-        min="1"
-        max="20"
-        value={strokeWidth}
-        onChange={(e) => setStrokeWidth(Number(e.target.value))}
-        className="w-32"
-      />
+          <label className="text-white">Size</label>
+          <input
+            type="range"
+            min="1"
+            max="20"
+            value={strokeWidth}
+            onChange={(e) => setStrokeWidth(Number(e.target.value))}
+            className="w-32"
+          />
 
-      <label className="text-white flex items-center gap-2">
-        <input
-          type="checkbox"
-          checked={fill}
-          onChange={(e) => setFill(e.target.checked)}
-        />
-        Fill Shape
-      </label>
+          <label className="text-white flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={fill}
+              onChange={(e) => setFill(e.target.checked)}
+            />
+            Fill Shape
+          </label>
 
-      <button
-        onClick={onUndo}
-        className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
-      >
-        Undo
-      </button>
-      <button
-        onClick={onRedo}
-        className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded"
-      >
-        Redo
-      </button>
+          <button
+            onClick={onUndo}
+            className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
+          >
+            Undo
+          </button>
+          <button
+            onClick={onRedo}
+            className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded"
+          >
+            Redo
+          </button>
+        </>
+      )}
 
+      {/* Download button - always visible */}
       <div className="relative">
         <button
           onClick={() => setShowDownloadMenu((prev) => !prev)}

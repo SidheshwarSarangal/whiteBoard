@@ -2,6 +2,8 @@ import React from "react";
 import { toast } from "react-hot-toast";
 
 const RoomInfo = ({ roomData }) => {
+  const currentUser = JSON.parse(localStorage.getItem("user")); // username as string
+
   if (!roomData) {
     return (
       <div className="w-72 bg-gray-800 flex flex-col text-white">
@@ -15,6 +17,10 @@ const RoomInfo = ({ roomData }) => {
     navigator.clipboard.writeText(text);
     toast.success("Copied to clipboard!");
   };
+
+  const isAllowed =
+    (roomData.allowedUsers && roomData.allowedUsers.includes(currentUser)) ||
+    roomData.owner === currentUser;
 
   return (
     <div className="w-72 cursor-default bg-gray-800 flex flex-col text-white">
@@ -41,20 +47,24 @@ const RoomInfo = ({ roomData }) => {
           <span className="font-semibold text-gray-300">Owner:</span>{" "}
           {roomData.owner}
         </p>
+
         <p>
           <span className="font-semibold text-gray-300">Access:</span>{" "}
-          {roomData.isPrivate ? "Private" : "Public"}
+          {roomData.isPrivate ? "Private 🔒" : "Public"}
         </p>
-        {roomData.isPrivate && roomData.password && (
+
+        {roomData.isPrivate && roomData.password && isAllowed && (
           <p>
             <span className="font-semibold text-gray-300">Password:</span>{" "}
             {roomData.password}
           </p>
         )}
+
         <p>
           <span className="font-semibold text-gray-300">Description:</span>{" "}
           {roomData.description || "N/A"}
         </p>
+
         <p>
           <span className="font-semibold text-gray-300">Created At:</span>{" "}
           {new Date(roomData.createdAt).toLocaleString()}

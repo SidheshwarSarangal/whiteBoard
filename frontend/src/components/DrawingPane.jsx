@@ -317,6 +317,7 @@ const DrawingPane = ({
     <div className="flex-1 bg-white relative">
       <canvas
         ref={canvasRef}
+        id="drawing-canvas" // ✅ Add this line
         className="absolute top-0 left-0 w-full h-full"
         style={{ width: "100%", height: "100%" }}
       />

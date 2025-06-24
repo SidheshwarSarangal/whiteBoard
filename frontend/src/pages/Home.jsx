@@ -1,4 +1,3 @@
-// src/pages/Home.jsx
 import React, { useEffect, useState } from "react";
 import TopBar from "../components/TopBar";
 import Sidebar from "../components/SideBar";
@@ -7,7 +6,7 @@ import axios from "axios";
 
 const Home = () => {
   const [myBoards, setMyBoards] = useState([]);
-  const [collabBoards] = useState([]); // Optional: Add logic for this later
+  const [collabBoards, setCollabBoards] = useState([]);
 
   const handleCreateSession = () => {
     console.log("Create Session Clicked");
@@ -21,15 +20,39 @@ const Home = () => {
     const user = JSON.parse(localStorage.getItem("user"));
     if (!user) return;
 
+    // 1. Fetch own boards
     axios
       .get(`http://localhost:5000/api/rooms/getRoomsByOwner?owner=${user}`)
-      .then((res) => {
-        setMyBoards(res.data);
-        console.log(myBoards);
-      })
+      .then((res) => setMyBoards(res.data))
+      .catch((err) => console.error("Failed to fetch my boards", err));
 
+    // 2. Fetch user's collab roomIds
+    axios
+      .get(`http://localhost:5000/api/users/collabs/${user}`)
+      .then(async (res) => {
+        const roomIds = res.data.collabs || [];
+
+        if (roomIds.length === 0) return;
+
+        // 3. Fetch full room data for each roomId
+        const responses = await Promise.all(
+          roomIds.map((id) =>
+            axios
+              .get(`http://localhost:5000/api/rooms/${id}`)
+              .then((res) => res.data)
+              .catch((err) => {
+                console.error(`Error fetching room ${id}:`, err);
+                return null;
+              })
+          )
+        );
+
+        // 4. Filter out failed requests
+        const validRooms = responses.filter((room) => room !== null);
+        setCollabBoards(validRooms);
+      })
       .catch((err) => {
-        console.error("Failed to fetch boards", err);
+        console.error("Failed to fetch collab list", err);
       });
   }, []);
 
@@ -78,10 +101,14 @@ const Home = () => {
                 {collabBoards.map((board, i) => (
                   <WhiteboardCard
                     key={i}
-                    title={board.title}
-                    description={board.description}
-                    access={board.access}
-                    onOpen={() => console.log("Open", board.title)}
+                    roomId={board.roomId}
+                    title={board.name}
+                    description={board.description || "No description"}
+                    access={board.isPrivate ? "Private" : "Public"}
+                    onOpen={() => {
+                      window.location.href = `/room/${board.roomId}`;
+                    }}
+                    date={new Date(board.createdAt).toLocaleDateString()}
                   />
                 ))}
               </div>

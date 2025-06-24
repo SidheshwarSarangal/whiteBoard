@@ -18,20 +18,27 @@ const JoinSessionModal = ({ onClose }) => {
     }
 
     try {
+      // Update the user's collabs with this roomId
+      await axios.post("http://localhost:5000/api/users/add-room-to-collabs", {
+        username: user,
+        roomId,
+      });
+
+      // Try joining the room
       const res = await axios.post("http://localhost:5000/api/rooms/join", {
         roomId,
         username: user,
         password,
       });
 
-      toast.success("Successfully joined the room!");
+      toast.success("Joined with view and edit allowance");
       onClose();
-      navigate(`/room/${roomId}`);
     } catch (error) {
       const msg =
         error.response?.data?.message || "Failed to join the room. Try again.";
-      toast.error(msg);
+      toast.error("Joined as View only!");
     }
+    navigate(`/room/${roomId}`);
   };
 
   return (
@@ -39,7 +46,9 @@ const JoinSessionModal = ({ onClose }) => {
       <div className="bg-[#1e1e2f] text-white rounded-lg shadow-xl p-6 w-[90%] max-w-md">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-bold">Join Whiteboard</h2>
-          <button className="text-white text-xl" onClick={onClose}>×</button>
+          <button className="text-white text-xl" onClick={onClose}>
+            ×
+          </button>
         </div>
         <form onSubmit={handleSubmit}>
           <input

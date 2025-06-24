@@ -7,6 +7,7 @@ import { SocketContext } from "../context/SocketContext";
 import RoomUsers from "../components/RoomUsers";
 import RoomInfo from "../components/RoomInfo";
 import DrawingPane from "../components/DrawingPane";
+import PreviewDrawingPane from "../components/PreviewDrawingPane";
 import DrawingTools from "../components/DrawingTools";
 
 const Room = () => {
@@ -15,16 +16,17 @@ const Room = () => {
 
   const [handleUndo, setHandleUndo] = useState(() => () => {});
   const [handleRedo, setHandleRedo] = useState(() => () => {});
-
   const [roomData, setRoomData] = useState(null);
+
   const [tool, setTool] = useState("pen");
   const [strokeColor, setStrokeColor] = useState("#000000");
   const [fillColor, setFillColor] = useState("#ffffff");
   const [strokeWidth, setStrokeWidth] = useState(2);
   const [fill, setFill] = useState(false);
 
+  const user = JSON.parse(localStorage.getItem("user"));
+
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("user"));
     socket.emit("join_room", { roomId, username: user });
 
     axios.get(`http://localhost:5000/api/rooms/${roomId}`).then((res) => {
@@ -61,6 +63,12 @@ const Room = () => {
     }
   };
 
+  const isUserAllowed =
+    roomData &&
+    (roomData.owner === user ||
+      (Array.isArray(roomData.allowedUsers) &&
+        roomData.allowedUsers.includes(user)));
+
   return (
     <div className="h-screen flex flex-col bg-gray-900 text-white">
       <DrawingTools
@@ -81,15 +89,20 @@ const Room = () => {
 
       <div className="flex flex-1">
         <RoomUsers roomId={roomId} roomData={roomData} />
-        <DrawingPane
-          roomId={roomId}
-          tool={tool}
-          strokeColor={strokeColor}
-          strokeWidth={strokeWidth}
-          fill={fill}
-          setUndoHandler={setHandleUndo}
-          setRedoHandler={setHandleRedo}
-        />
+
+        {isUserAllowed ? (
+          <DrawingPane
+            roomId={roomId}
+            tool={tool}
+            strokeColor={strokeColor}
+            strokeWidth={strokeWidth}
+            fill={fill}
+            setUndoHandler={setHandleUndo}
+            setRedoHandler={setHandleRedo}
+          />
+        ) : (
+          <PreviewDrawingPane roomId={roomId} /> // ✅ viewer only
+        )}
         <RoomInfo roomId={roomId} roomData={roomData} />
       </div>
     </div>
