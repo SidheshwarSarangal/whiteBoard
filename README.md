@@ -41,3 +41,12 @@ The project is real time collaborative whiteboard application which allows multi
 - In edit mode, the user can use tools like pen, eraser, text, straight lines, rectangle and circles on the drawing pane. There is an option for color filling for rectangle and circle. There is a color picker. There is dropdown for choosing different size of the elements. There is option for undo and redo for that user. There is also an option to clear canvas whhich deletes all the information on the canvas(you cannot undo it). 
 
 - The download as jpg, png and pdf option is available for both edit mode and read mode users.
+
+---
+
+## Tech Stack
+
+- Used React.js (with Vite) for frontend and Node.js for backend.
+- The database is MongoDB.
+- The forntend hosted on Vercel and the backend on Render.
+- Used socket.io for creating real time expreirnce for white boards.
