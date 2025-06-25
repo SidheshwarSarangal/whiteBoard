@@ -1,5 +1,5 @@
 ﻿# WhiteBoard
- This is the open ptoject under MARS @IIT Roorkee, given in the summer of 2025. The project is completed by me, Sidheshwar Sarangal, 22124041. Its a web development project. The problem statement was to develop a real-time collaborative whiteboard application that allows multiple users to draw, write, and interact simultaneously, replicating the experience of a physical whiteboard on the web.
+ This is the open ptoject under MARS @IIT Roorkee, given in the summer of 2025. The project is completed by me, Sidheshwar Sarangal, 22124041. It's a web development project. The problem statement was to develop a real-time collaborative whiteboard application that allows multiple users to draw, write, and interact simultaneously, replicating the experience of a physical whiteboard on the web.
 
 ---
 
@@ -40,7 +40,7 @@ The project is real time collaborative whiteboard application which allows multi
 - Used React.js (with Vite) for frontend and Node.js for backend.
 - The database is MongoDB.
 - The forntend hosted on Vercel and the backend on Render.
-- Used socket.io for creating real time expreirnce for white boards.
+- Used socket.io for creating real time expriernce for white boards.
   
 ---
 
