@@ -51,3 +51,24 @@ Clone the repository
 ```bash
 git clone https://github.com/SidheshwarSarangal/whiteBoard.git
 ```
+
+In two differnt terminals do
+```bash
+cd frontend
+npm run dev
+```
+```bash
+cd backend
+npm run dev
+```
+ With this you will be able to run the project locally.
+
+---
+
+ ## Demo Link
+ [Live Website](https://white-board-git-main-sidheshwar-sarangals-projects.vercel.app/)
+
+---
+
+Name-Sidheshwar Sarangal
+Enrolment Number-22124041
