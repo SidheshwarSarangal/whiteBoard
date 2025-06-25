@@ -13,3 +13,17 @@
 ---
 
 ## Project Description
+
+The project is real time collaborative whiteboard application which allows multiple users to draw, write and interact simultaneously.
+-The whiteboard works in real time. The changes done by a user will be visible to all the users present in the room in real time.
+-The users can create accounts and sign in.
+-The users can create a room where the white board is present.
+-The rooms can be personal or private. For private rooms, the user has to mention password.
+-The room opens after its creation and the user get to see the tool bar at the top, the moom members information on the left, the information about the room on the right and the drawing pane in the center.
+-The room information in the right consists of unique room key which can be copied and the password if the room is private.
+-Any other user with this room key can join the room.
+-If the room is public, then there is no need of password by the other user. He can enter the room and is allowed to view and edit the drawing pane.
+-If the room is private, then in order to join the room with editing allowance, he needs to enter the correct password.
+-If he enters without submitting password or he enteres a wrong password, then he can only view the room and its information(except the room password).
+-In edit mode, the user can use tools like pen, eraser, text, straight lines, rectangle and circles on the drawing pane. There is an option for color filling for rectangle and circle. There is a color picker. There is dropdown for choosing different size of the elements. There is option for undo and redo for that user. There is also an option to clear canvas whhich deletes all the information on the canvas(you cannot undo it). 
+-The download as jpg, png and pdf option is available for both edit mode and read mode users.
