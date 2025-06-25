@@ -14,7 +14,7 @@
 
 ## Project Description
 
-The project is real time collaborative whiteboard application which allows multiple users to draw, write and interact simultaneously. The whiteboard works in real time. The changes done by a user will be visible to all the users present in the room in real time.
+The project is real time collaborative whiteboard application which allows multiple users to draw, write and interact simultaneously. The whiteboard works in real time. The changes done by a user will be visible to all the users present in the room in real time and differnt users can edit (or view only in case of private room without password) and download the canvas.
 
 ---
 
