@@ -48,4 +48,6 @@ The project is real time collaborative whiteboard application which allows multi
 To run it locally-
 
 Clone the repository
+```bash
+git clone https://github.com/SidheshwarSarangal/whiteBoard.git
 ```
