@@ -56,10 +56,12 @@ git clone https://github.com/SidheshwarSarangal/whiteBoard.git
 In two differnt terminals do
 ```bash
 cd frontend
+npm install
 npm run dev
 ```
 ```bash
 cd backend
+npm install
 npm run dev
 ```
  With this you will be able to run the project locally.
