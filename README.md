@@ -9,11 +9,15 @@ You can put the credentails in two computer systems or in two browsers to check 
 I have these following credentials which can be used for testing. 
 
 user - 
+
 email:user@gmail.com
+
 password:user
 
 user1 -
+
 email:user1@gmail.com
+
 password:user
 
 The backend is running on a free service so the signin can take a little time.
@@ -93,4 +97,5 @@ npm run dev
 Name-Sidheshwar Sarangal
 
 Enrolment Number-22124041
+
 
