@@ -4,6 +4,20 @@
 ---
 
 ## Deployed Website Link
+You can put the credentails in two computer systems or in two browsers to check the implementation of the room joining and collaborative whiteborads.
+
+I have these following credentials which can be used for testing. 
+
+user - 
+email:user@gmail.com
+password:user
+
+user1 -
+email:user1@gmail.com
+password:user
+
+The backend is running on a free service so the signin can take a little time.
+
 [Live Website](https://white-board-git-main-sidheshwar-sarangals-projects.vercel.app/)
 
 ---
@@ -79,3 +93,4 @@ npm run dev
 Name-Sidheshwar Sarangal
 
 Enrolment Number-22124041
+
