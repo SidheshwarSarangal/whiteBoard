@@ -10,15 +10,16 @@ I have these following credentials which can be used for testing.
 
 user - 
 
-email:user@gmail.com
+email: user@gmail.com
 
-password:user
+password: user
+
 
 user1 -
 
-email:user1@gmail.com
+email: user1@gmail.com
 
-password:user
+password: user
 
 The backend is running on a free service so the signin can take a little time.
 
@@ -97,5 +98,6 @@ npm run dev
 Name-Sidheshwar Sarangal
 
 Enrolment Number-22124041
+
 
 
