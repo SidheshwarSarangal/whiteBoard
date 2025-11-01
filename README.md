@@ -6,6 +6,12 @@
 ## Deployed Website Link
 You can put the credentails in two computer systems or in two browsers to check the implementation of the room joining and collaborative whiteborads.
 
+Users can draw/edit/export boards and collaborate using room access controlled via keys and optional passwords. 
+
+Try implementing the creation of public and private rooms and share the access key which is available on the right side bar of the rooms. The other user can put this key for joining the room. If the room is public then the other user can freely collaborate on it. If it is private, then the other user is required to put the password along with the room joining access key before entering the room in order to collaborate. If they cannot provide the password of the private room, then they can only view the activities of the room and cannot collaborate.
+
+You can view the Demo Video in order to understand all the features.
+
 I have these following credentials which can be used for testing. 
 
 user - 
@@ -23,7 +29,7 @@ password: user
 
 The backend is running on a free service so the signin can take a little time.
 
-### [Live Website Link](https://white-board-git-main-sidheshwar-sarangals-projects.vercel.app/)
+[Live Website Link](https://white-board-git-main-sidheshwar-sarangals-projects.vercel.app/)
 
 ---
 
@@ -98,6 +104,7 @@ npm run dev
 Name-Sidheshwar Sarangal
 
 Enrolment Number-22124041
+
 
 
 
